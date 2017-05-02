@@ -7,47 +7,80 @@ import re
 import sys
 from argparse import ArgumentParser
 import random
-pocet_pdb_souboru=0
+import subprocess
+from math import sqrt
+
+
 parser = ArgumentParser()
-pdb_soubory=[]
+pdb_files=[]
 
 parser.add_argument("-d", "--dir", dest="myDirVariable",
-                    help="choose dir", metavar="DIR",required=True)
+                    help="Choose dir", metavar="DIR",required=True)
 
-parser.add_argument("-n", metavar='N', type=int, dest="pocet_vybranych",
-                        help="pocet zvolenych srtuktur")
+parser.add_argument("-n", metavar='N', type=int, dest="number_of_selected_files",
+                        help="Number of selected structure")
 
-parser.add_argument("-k", metavar='K', type=int, dest="pocet_vybranych_z_n",
-                        help="pocet vybranych molekul ze souboru n")
+parser.add_argument("-k", metavar='K', type=int, dest="k_number_of_options",
+                        help="Number of possibility structure, less then selected files")
+
+parser.add_argument ("-q",metavar='Q', type=int, dest="mixing_koeficient",
+                        help="Mixing koeficient" )
 
 
 args = parser.parse_args() #zpacuje argumenty skriptu
-
 files = listdir(args.myDirVariable)
 
 for line in files:
         #print line
         line = line.rstrip()
         if re.search('pdb.dat', line):
-            pocet_pdb_souboru=pocet_pdb_souboru+1
-            pdb_soubory.append(line)
+            pdb_files.append(line)
             #print line
-number_of_pdb_files = len(pdb_soubory)
-print ('počet', number_of_pdb_files)
+total_number_of_pdb_files = len(pdb_files)
+print ('Parametrs ')
+print ('Total number of pdb.dat files', total_number_of_pdb_files)
 
-print (pocet_pdb_souboru)
+if total_number_of_pdb_files<args.number_of_selected_files:
+    print ("Number od pdb.dat files is ", total_number_of_pdb_files)
+    sys.exit(0)
 
-print (args.myDirVariable)
-print (args.pocet_vybranych)
-print (args.pocet_vybranych_z_n)
-print (pdb_soubory)
+if args.k_number_of_options>args.number_of_selected_files:
+    print ("Pocet vybranych souboru je pouze", args.number_of_selected_files)
+    sys.exit(0)
+
+if args.mixing_koeficient != 1:
+    print ("For q>1 is not implemented now \n")
+    sys.exit(0)
+
+print ('Files from directory', args.myDirVariable)
+print ('The number of the selected files',args.number_of_selected_files)
+print ('The number of selected options', args.k_number_of_options)
+print ('All pdb.dat files \n',pdb_files)
+
+selected_files_for_ensamble = random.sample(pdb_files, args.number_of_selected_files)
+print ('Randomly selected files: \n',selected_files_for_ensamble)
+
+list_of_random_items = random.sample(selected_files_for_ensamble,args.k_number_of_options)
+print ('Randomly selected files: \n',list_of_random_items)
 
 
-if pocet_pdb_souboru<args.pocet_vybranych:
-    print ("Souborů je pouze ", pocet_pdb_souboru)
+str1 = ''.join(str(e)+"\n"  for e in list_of_random_items)
 
-if args.pocet_vybranych_z_n>args.pocet_vybranych:
-    print ("Pocet vybranych souboru je pouze", args.pocet_vybranych)
+#hodnoty indexů vybraných stukrur
+for e in list_of_random_items:
+    value_of_index=selected_files_for_ensamble.index(e)
+    print(selected_files_for_ensamble.index(e))
 
-#list_of_random_items = random.sample(pdb_soubory, args.pocet_vybranych)
-#print (list_of_random_items)
+f = open('input_for_ensamble_fit', 'w')
+f.write(str1)
+f.close()
+
+#subprocess.call("/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n 10 -m /storage/brno2/home/petrahrozkova/SAXS/mod08.pdb.dat",shell=True)
+
+#RMSD in PyMol
+f = open('result','r')
+(f.readline())
+result=f.readline()
+values_of_index_result=result.split(',')
+str2 = ''.join(str(e)+"\n"  for e in values_of_index_result)
+print (str2)
