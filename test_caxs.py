@@ -100,13 +100,17 @@ result=f.readline()
 values_of_index_result=result.split(',')[4:]
 str2 = ''.join(str(e)+"\n"  for e in values_of_index_result)
 print (str2)
-
+sum_rmsd=0
 for i in values_of_index_result:
     f = float(i)
     if f != 0:
         print (i)
         selected_index=values_of_index_result.index(i)
         print (selected_index)
-        rmsd_pymol(selected_files_for_ensamble[selected_index],list_of_random_items[0])
+        computed_rmsd=rmsd_pymol(selected_files_for_ensamble[selected_index],list_of_random_items[0])
+        print ('Adjusted rmsd ', f*computed_rmsd, '\n')
+        sum_rmsd += f*computed_rmsd
+print ('Sum of RMSD',sum_rmsd)
+
 
 #print (str2)
