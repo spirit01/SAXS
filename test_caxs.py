@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 import random
 import subprocess
 from math import sqrt
+import ast
 
 
 parser = ArgumentParser()
@@ -29,6 +30,17 @@ parser.add_argument ("-q",metavar='Q', type=int, dest="mixing_koeficient",
 
 args = parser.parse_args() #zpacuje argumenty skriptu
 files = listdir(args.myDirVariable)
+
+def rmsd_pymol(structure_1, structure_2):
+    file_for_pymol=open('script_for_pymol.pml', 'w')
+    file_for_pymol.write('run fitting.py \n')
+    file_for_pymol.write('load '+  structure_1[:len(structure_1)-4]+'\n' )
+    file_for_pymol.write('load '+  structure_2[:len(structure_2)-4]+'\n' )
+    file_for_pymol.write('fitting '+ structure_1[:len(structure_1)-8] + ', c. a, ')
+    file_for_pymol.write(structure_2[:len(structure_2)-8] + ', c. a \n')
+    file_for_pymol.write('quit \n')
+    file_for_pymol.close()
+
 
 for line in files:
         #print line
@@ -81,6 +93,16 @@ f.close()
 f = open('result','r')
 (f.readline())
 result=f.readline()
-values_of_index_result=result.split(',')
+values_of_index_result=result.split(',')[4:]
 str2 = ''.join(str(e)+"\n"  for e in values_of_index_result)
 print (str2)
+
+for i in values_of_index_result:
+    f = float(i)
+    if f != 0:
+        print (i)
+        selected_index=values_of_index_result.index(i)
+        print (selected_index)
+        rmsd_pymol(selected_files_for_ensamble[selected_index],list_of_random_items[0])
+
+#print (str2)
