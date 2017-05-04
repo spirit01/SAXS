@@ -41,6 +41,10 @@ def rmsd_pymol(structure_1, structure_2):
     file_for_pymol.write('quit \n')
     file_for_pymol.close()
 
+    out_pymol=subprocess.check_output("pymol -c script_for_pymol.pml | grep selection", shell=True)
+    rmsd = float (out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
+    print ('RMSD ', structure_1, ' and ', structure_2 , ' = ',rmsd)
+    return rmsd
 
 for line in files:
         #print line
