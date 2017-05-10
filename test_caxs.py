@@ -38,16 +38,14 @@ def rmsd_pymol(structure_1, structure_2):
                 'load {s2}').format(s1=structure_1, s2=structure_2)
     with open("file_for_pymol", "w") as file_for_pymol:
     #file_for_pymol=open('script_for_pymol.pml', 'w')
-        file_for_pymol.write('run fitting.py \n')
-        file_for_pymol.write('load '+ os.path.splitext(structure_1)[0]+'\n' )
-    #print ('text 1',os.path.splitext(os.path.splitext(structure_1)[0])[0])
-    #print ( os.path.splitext(os.path.splitext(structure_2)[0])[0])
-        file_for_pymol.write('load '+ os.path.splitext(structure_2)[0]+'\n' )
-        file_for_pymol.write('fitting '+ os.path.splitext(os.path.splitext(structure_1)[0])[0] + ', c. a, ')
-        file_for_pymol.write(os.path.splitext(os.path.splitext(structure_2)[0])[0] + ', c. a \n')
-        file_for_pymol.write('quit \n')
+        file_for_pymol.write('run fitting.py \n'+
+        'load '+ {s1} +'\n'+
+        'load '+ {s2} +'\n'+
+        'fitting '+ os.path.splitext(os.path.splitext(structure_1)[0])[0] + ', c. a, '+
+        os.path.splitext(os.path.splitext(structure_2)[0])[0] + ', c. a \n' + 'quit \n'.format(s1='os.path.splitext(structure_1)[0]', s2='os.path.splitext(structure_2)[0]'))
         #file_for_pymol.close()
-
+        #print ('text 1',os.path.splitext(os.path.splitext(structure_1)[0])[0])
+        #print ( os.path.splitext(os.path.splitext(structure_2)[0])[0])
     out_pymol=subprocess.check_output("pymol -c script_for_pymol.pml | grep selection", shell=True)
     rmsd = float (out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
     print ('RMSD ', structure_1, ' and ', structure_2 , ' = ',rmsd)
