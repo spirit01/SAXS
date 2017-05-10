@@ -3,6 +3,7 @@
 """testovaci program pro ENSAMBLE, -d adresař -n počet modelů -k počet vybranných
 vybraných molekul, -r počet opakování"""
 from os import listdir
+import os
 import re
 import sys
 from argparse import ArgumentParser
@@ -19,27 +20,33 @@ parser.add_argument("-d", "--dir", dest="myDirVariable",
                     help="Choose dir", metavar="DIR",required=True)
 
 parser.add_argument("-n", metavar='N', type=int, dest="number_of_selected_files",
-                        help="Number of selected structure")
+                        help="Number of selected structure",required=True)
 
 parser.add_argument("-k", metavar='K', type=int, dest="k_number_of_options",
-                        help="Number of possibility structure, less then selected files")
+                        help="Number of possibility structure, less then selected files",required=True)
 
 parser.add_argument ("-q",metavar='Q', type=int, dest="mixing_koeficient",
-                        help="Mixing koeficient" )
+                        help="Mixing koeficient",default=1)
 
 
 args = parser.parse_args() #zpacuje argumenty skriptu
 files = listdir(args.myDirVariable)
 
 def rmsd_pymol(structure_1, structure_2):
-    file_for_pymol=open('script_for_pymol.pml', 'w')
-    file_for_pymol.write('run fitting.py \n')
-    file_for_pymol.write('load '+  structure_1[:len(structure_1)-4]+'\n' )
-    file_for_pymol.write('load '+  structure_2[:len(structure_2)-4]+'\n' )
-    file_for_pymol.write('fitting '+ structure_1[:len(structure_1)-8] + ', c. a, ')
-    file_for_pymol.write(structure_2[:len(structure_2)-8] + ', c. a \n')
-    file_for_pymol.write('quit \n')
-    file_for_pymol.close()
+
+    script = ('load {s1} \n'
+                'load {s2}').format(s1=structure_1, s2=structure_2)
+    with open("file_for_pymol", "w") as file_for_pymol:
+    #file_for_pymol=open('script_for_pymol.pml', 'w')
+        file_for_pymol.write('run fitting.py \n')
+        file_for_pymol.write('load '+ os.path.splitext(structure_1)[0]+'\n' )
+    #print ('text 1',os.path.splitext(os.path.splitext(structure_1)[0])[0])
+    #print ( os.path.splitext(os.path.splitext(structure_2)[0])[0])
+        file_for_pymol.write('load '+ os.path.splitext(structure_2)[0]+'\n' )
+        file_for_pymol.write('fitting '+ os.path.splitext(os.path.splitext(structure_1)[0])[0] + ', c. a, ')
+        file_for_pymol.write(os.path.splitext(os.path.splitext(structure_2)[0])[0] + ', c. a \n')
+        file_for_pymol.write('quit \n')
+        #file_for_pymol.close()
 
     out_pymol=subprocess.check_output("pymol -c script_for_pymol.pml | grep selection", shell=True)
     rmsd = float (out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
@@ -87,11 +94,15 @@ for e in list_of_random_items:
     value_of_index=selected_files_for_ensamble.index(e)
     print(selected_files_for_ensamble.index(e))
 
-f = open('input_for_ensamble_fit', 'w')
-f.write(str1)
-f.close()
+with open ("input_for_ensamble_fit", "w") as f:
+#f = open('input_for_ensamble_fit', 'w')
+    f.write(str1)
+    #f.close()
 
-#subprocess.call("/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n 10 -m /storage/brno2/home/petrahrozkova/SAXS/mod08.pdb.dat",shell=True)
+
+#command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n 10 -m /storage/brno2/home/petrahrozkova/SAXS/"+ list_of_random_items[0]
+
+#subprocess.call(command,shell=True)
 
 #RMSD in PyMol
 f = open('result','r')
@@ -101,12 +112,14 @@ values_of_index_result=result.split(',')[4:]
 str2 = ''.join(str(e)+"\n"  for e in values_of_index_result)
 print (str2)
 sum_rmsd=0
+#subprocess.call("module add pymol")
 for i in values_of_index_result:
     f = float(i)
+    print ('hodnota', i)
     if f != 0:
-        print (i)
+        print ('hodnota indexu', i)
         selected_index=values_of_index_result.index(i)
-        print (selected_index)
+        print ('číslo',selected_index)
         computed_rmsd=rmsd_pymol(selected_files_for_ensamble[selected_index],list_of_random_items[0])
         print ('Adjusted rmsd ', f*computed_rmsd, '\n')
         sum_rmsd += f*computed_rmsd
