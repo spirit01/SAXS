@@ -10,9 +10,9 @@ import subprocess
 from math import sqrt
 import ast
 
-"""ENSAMBLE, -d adresař -n počet modelů """
-"""-k počet vybranných"""
-"""vybraných molekul, -r počet opakování"""
+"""ENSAMBLE, -d directory -n number of models """
+"""-k number of selected structure"""
+"""-r repet of program"""
 
 parser = ArgumentParser()
 pdb_files = []
@@ -109,22 +109,16 @@ with open('result', 'r') as f:
     (f.readline())
     result = f.readline()
     values_of_index_result = result.split(',')[4:]
-    str2 = ''.join(str(e)+"\n" for e in values_of_index_result)
-    print(str2)
     sum_rmsd = 0
 # subprocess.call("module add pymol")
 
 dictionary_index_and_structure = dict()
 for i, j in enumerate(selected_files_for_ensamble):
     dictionary_index_and_structure[i] = j
-print(dictionary_index_and_structure)
 
 for i, j in enumerate(values_of_index_result):
-    print(i, j)
     f = float(j)
     if f != 0:
-        print('hodnota indexu', i)
-        print('číslo', i)
         computed_rmsd = rmsd_pymol(selected_files_for_ensamble[i],
                                    list_of_random_items[0])
         print('Adjusted rmsd ', f*computed_rmsd, '\n')
