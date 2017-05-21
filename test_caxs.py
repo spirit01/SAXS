@@ -52,7 +52,7 @@ def rmsd_pymol(structure_1, structure_2):
                    s4=os.path.splitext(structure_2)[0]))
     #command = "module add pymol-1.8.2.1-gcc"
     #subprocess.call(command,shell=True)
-    out_pymol = subprocess.check_output("pymol -c file_for_pymol.pml | grep selection", shell=True)
+    out_pymol = subprocess.check_output("module add pymol-1.8.2.1-gcc; pymol -c file_for_pymol.pml | grep selection ;module rm pymol-1.8.2.1-gcc", shell=True)
     #command = "module remove pymol-1.8.2.1-gcc"
     #subprocess.call(command,shell=True)
     rmsd = float(out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
@@ -103,18 +103,17 @@ for e in list_of_random_items:
 
 with open("input_for_ensamble_fit", "w") as f:
     f.write(str1)
-"""
+
 command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items[0]+".dat"
 
 subprocess.call(command,shell=True)
-"""
+
 # RMSD in PyMol
 with open('result', 'r') as f:
     (f.readline())
     result = f.readline()
     values_of_index_result = result.split(',')[4:]
     sum_rmsd = 0
-# subprocess.call("module add pymol")
 
 dictionary_index_and_structure = dict()
 for i, j in enumerate(selected_files_for_ensamble):
