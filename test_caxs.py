@@ -42,16 +42,19 @@ files = listdir(args.myDirVariable)
 def rmsd_pymol(structure_1, structure_2):
     with open("file_for_pymol.pml", "w") as file_for_pymol:
         file_for_pymol.write("""
-run fitting.py
-load  {s1}
-load  {s2}
-fitting {s3}  , c. a,  {s4} , c. a
-quit
-""".format(s1=structure_1, s2=structure_2,
-           s3=os.path.splitext(structure_1)[0],
-           s4=os.path.splitext(structure_2)[0]))
-
+        run fitting.py
+        load  {s1}
+        load  {s2}
+        fitting {s3}  , c. a,  {s4} , c. a
+        quit
+        """.format(s1=structure_1, s2=structure_2,
+                   s3=os.path.splitext(structure_1)[0],
+                   s4=os.path.splitext(structure_2)[0]))
+    #command = "module add pymol-1.8.2.1-gcc"
+    #subprocess.call(command,shell=True)
     out_pymol = subprocess.check_output("pymol -c file_for_pymol.pml | grep selection", shell=True)
+    #command = "module remove pymol-1.8.2.1-gcc"
+    #subprocess.call(command,shell=True)
     rmsd = float(out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
     print('RMSD ', structure_1, ' and ', structure_2, ' = ', rmsd)
     return rmsd
@@ -59,6 +62,7 @@ quit
 for line in files:
         line = line.rstrip()
         if re.search('.pdb$', line):
+        #if re.search('.pdb.dat', line):
             pdb_files.append(line)
 
 total_number_of_pdb_files = len(pdb_files)
@@ -70,7 +74,7 @@ if total_number_of_pdb_files < args.number_of_selected_files:
     sys.exit(0)
 
 if args.k_number_of_options > args.number_of_selected_files:
-    print("Pocet vybranych souboru je pouze", args.number_of_selected_files)
+    print("Number of selected structure is only", args.number_of_selected_files)
     sys.exit(0)
 
 if args.mixing_koeficient != 1:
@@ -99,11 +103,11 @@ for e in list_of_random_items:
 
 with open("input_for_ensamble_fit", "w") as f:
     f.write(str1)
+"""
+command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items[0]+".dat"
 
-# command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n 10 -m /storage/brno2/home/petrahrozkova/SAXS/"+ list_of_random_items[0]
-
-# subprocess.call(command,shell=True)
-
+subprocess.call(command,shell=True)
+"""
 # RMSD in PyMol
 with open('result', 'r') as f:
     (f.readline())
