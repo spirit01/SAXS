@@ -9,13 +9,14 @@ import random
 import subprocess
 from math import sqrt
 import ast
-
+from adderror.py import adderror
 """ENSAMBLE, -d directory -n number of models """
 """-k number of selected structure"""
 """-r repet of program"""
 
 parser = ArgumentParser()
 pdb_files = []
+exp_file = []
 
 parser.add_argument("-d", "--dir", dest="myDirVariable",
                     help="Choose dir", metavar="DIR", required=True)
@@ -42,28 +43,30 @@ files = listdir(args.myDirVariable)
 def rmsd_pymol(structure_1, structure_2):
     with open("file_for_pymol.pml", "w") as file_for_pymol:
         file_for_pymol.write("""
-        run fitting.py
         load  {s1}
         load  {s2}
-        fitting {s3}  , c. a,  {s4} , c. a
+        align {s3}, {s4}
         quit
         """.format(s1=structure_1, s2=structure_2,
                    s3=os.path.splitext(structure_1)[0],
                    s4=os.path.splitext(structure_2)[0]))
-    #command = "module add pymol-1.8.2.1-gcc"
-    #subprocess.call(command,shell=True)
-    out_pymol = subprocess.check_output("module add pymol-1.8.2.1-gcc; pymol -c file_for_pymol.pml | grep selection ;module rm pymol-1.8.2.1-gcc", shell=True)
-    #command = "module remove pymol-1.8.2.1-gcc"
-    #subprocess.call(command,shell=True)
-    rmsd = float(out_pymol[out_pymol.index(b'=')+1:len(out_pymol)-1])
+    out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
+    #part for home:out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
+    #part for META:out_pymol = subprocess.check_output("module add pymol-1.8.2.1-gcc; pymol -c file_for_pymol.pml | grep Executive:;module rm pymol-1.8.2.1-gcc", shell=True)
+    rmsd = float(out_pymol[out_pymol.index(b'=')+1:out_pymol.index(b'(')-1])
     print('RMSD ', structure_1, ' and ', structure_2, ' = ', rmsd)
     return rmsd
 
+
 for line in files:
-        line = line.rstrip()
-        if re.search('.pdb$', line):
+    line = line.rstrip()
+    if re.search('.pdb$', line):
         #if re.search('.pdb.dat', line):
-            pdb_files.append(line)
+        pdb_files.append(line)
+    #if re.search('exp.dat', line):
+        #print('experimental file', line)
+    #    exp_file.append(line)
+
 
 total_number_of_pdb_files = len(pdb_files)
 print('Parametrs ')
@@ -95,6 +98,8 @@ list_of_random_items = random.sample(selected_files_for_ensamble,
                                      args.k_number_of_options)
 print('Randomly selected files: \n', list_of_random_items)
 
+list_of_random_items[0] = adderror("exp.dat",list_of_random_items[0])
+
 str1 = ''.join(str(e)+"\n" for e in list_of_random_items)
 
 for e in list_of_random_items:
@@ -104,9 +109,9 @@ for e in list_of_random_items:
 with open("input_for_ensamble_fit", "w") as f:
     f.write(str1)
 
-command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items[0]+".dat"
+#command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items[0]+".dat"
 
-subprocess.call(command,shell=True)
+#subprocess.call(command,shell=True)
 
 # RMSD in PyMol
 with open('result', 'r') as f:
