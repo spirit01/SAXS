@@ -9,7 +9,7 @@ import random
 import subprocess
 from math import sqrt
 import ast
-from adderror.py import adderror
+from adderror import adderror
 """ENSAMBLE, -d directory -n number of models """
 """-k number of selected structure"""
 """-r repet of program"""
@@ -98,10 +98,11 @@ list_of_random_items = random.sample(selected_files_for_ensamble,
                                      args.k_number_of_options)
 print('Randomly selected files: \n', list_of_random_items)
 
-list_of_random_items[0] = adderror("exp.dat",list_of_random_items[0])
+list_of_random_items[0] = adderror("exp.dat",list_of_random_items[0]+'.dat')
 
 str1 = ''.join(str(e)+"\n" for e in list_of_random_items)
-
+print(str1)
+"""
 for e in list_of_random_items:
     value_of_index = selected_files_for_ensamble.index(e)
     print(selected_files_for_ensamble.index(e))
@@ -133,3 +134,5 @@ for i, j in enumerate(values_of_index_result):
         sum_rmsd += f*computed_rmsd
 
 print('Sum of RMSD', sum_rmsd)
+
+"""
