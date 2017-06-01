@@ -49,7 +49,7 @@ def argument():
     global files
     global list_of_random_items_modified
     files = listdir(args.myDirVariable)
-    list_of_random_items_modified = [None]*1
+    list_of_random_items_modified = [None]*args.k_number_of_options
     return(args)
 
 def rmsd_pymol(structure_1, structure_2):
@@ -115,7 +115,8 @@ def argument_processing(args, total_number_of_pdb_files):
     print('Randomly selected files: \n', list_of_random_items)
 
 def using_adderror():
-    list_of_random_items_modified[0] = adderror("exp.dat",list_of_random_items[0]+'.dat')
+    for i in range(args.k_number_of_options):
+        list_of_random_items_modified[i] = adderror("exp.dat",list_of_random_items[i]+'.dat')
     str1 = ''.join(str(e)+"\n" for e in list_of_random_items_modified)
     str2 = ''.join(str(e)+"\n" for e in list_of_random_items)
     print(str1)
@@ -125,17 +126,21 @@ def using_adderror():
 
 def find_index(strings):
     for e in list_of_random_items:
-        value_of_index = selected_files_for_ensamble.index(e)
+        value_of_index[e] = selected_files_for_ensamble.index(e)
         print(selected_files_for_ensamble.index(e))
 
     with open("input_for_ensamble_fit", "w") as f:
         f.write(strings[0])
 
 def ensamble_fit():
-    command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items_modified[0]+".dat"
+    ensable_output=[None]*args.k_number_of_options
+    for i in range(k_number_of_options):
+        command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items_modified[i]+".dat"
 
-    subprocess.call(command,shell=True)
+        subprocess.call(command,shell=True)
+        ensable_output[i] =  result_rmsd()
 
+    return(ensable_output)
 def result_rmsd():
     with open('result', 'r') as f:
         (f.readline())
@@ -143,9 +148,9 @@ def result_rmsd():
         values_of_index_result = result.split(',')[4:]
         return(values_of_index_result)
 
-def pymol_processing():
+def pymol_processing(ensable_output):
     sum_rmsd = 0
-    values_of_index_result = result_rmsd()
+    values_of_index_result = ensable_output[0]
     dictionary_index_and_structure = dict()
     for i, j in enumerate(selected_files_for_ensamble):
         dictionary_index_and_structure[i] = j
@@ -165,8 +170,13 @@ if __name__ == '__main__':
     args = argument()
     total_number_of_pdb_files = searching_pdb()
     for i in range(args.repeat):
-        argument_processing(args, total_number_of_pdb_files)
-        strings = using_adderror()
-        find_index(strings)
-        #ensamble-fit()
-        pymol_processing()
+         argument_processing(args, total_number_of_pdb_files)
+         strings = using_adderror()
+        #find_index(strings)
+    #    ensamble_output = ensamble-fit()
+    ensamble_output=[None]*1
+    ensamble_output[0] = result_rmsd()
+    if args.k_number_of_options ==1:
+        pymol_processing(ensamble_output)
+    else:
+        print("not implemented")

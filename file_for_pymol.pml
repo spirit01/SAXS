@@ -1,6 +1,6 @@
 
         load  mod06.pdb
-        load  mod09.pdb
-        align mod06, mod09
+        load  mod06.pdb
+        align mod06, mod06
         quit
         
