@@ -17,6 +17,9 @@ from adderror import adderror
 files = []
 pdb_files = []
 exp_file = []
+list_of_random_items_modified = []
+list_of_random_items = []
+selected_files_for_ensamble = []
 
 def argument():
     parser = ArgumentParser()
@@ -38,6 +41,8 @@ def argument():
                         default=1)
     args = parser.parse_args()
 
+    global files
+    global list_of_random_items_modified
     files = listdir(args.myDirVariable)
     list_of_random_items_modified = [None]*1
     return(args)
@@ -94,10 +99,12 @@ def argument_processing(args, total_number_of_pdb_files):
     print('The number of selected options', args.k_number_of_options)
     print('All pdb.dat files \n', pdb_files)
 
+    global selected_files_for_ensamble
     selected_files_for_ensamble = random.sample(pdb_files,
                                                 args.number_of_selected_files)
     print('Randomly selected files: \n', selected_files_for_ensamble)
 
+    global list_of_random_items
     list_of_random_items = random.sample(selected_files_for_ensamble,
                                          args.k_number_of_options)
     print('Randomly selected files: \n', list_of_random_items)
@@ -109,13 +116,15 @@ def using_adderror():
     print(str1)
     print(str2)
 
-def find_index():
+    return(str1, str2)
+
+def find_index(strings):
     for e in list_of_random_items:
         value_of_index = selected_files_for_ensamble.index(e)
         print(selected_files_for_ensamble.index(e))
 
     with open("input_for_ensamble_fit", "w") as f:
-        f.write(str1)
+        f.write(strings[0])
 
 def ensamble_fit():
     command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items_modified[0]+".dat"
@@ -127,9 +136,11 @@ def result_rmsd():
         (f.readline())
         result = f.readline()
         values_of_index_result = result.split(',')[4:]
-        sum_rmsd = 0
+        return(values_of_index_result)
 
 def pymol_processing():
+    sum_rmsd = 0
+    values_of_index_result = result_rmsd()
     dictionary_index_and_structure = dict()
     for i, j in enumerate(selected_files_for_ensamble):
         dictionary_index_and_structure[i] = j
@@ -149,7 +160,7 @@ if __name__ == '__main__':
     args = argument()
     total_number_of_pdb_files = searching_pdb()
     argument_processing(args, total_number_of_pdb_files)
-    using_adderror()
-    find_index()
+    strings = using_adderror()
+    find_index(strings)
     #ensamble-fit()
     pymol_processing()
