@@ -39,6 +39,11 @@ def argument():
     parser.add_argument("-q", metavar='Q', type=int,
                         dest="mixing_koeficient", help="Mixing koeficient",
                         default=1)
+    parser.add_argument("-r", metavar='R', type=int,
+                        dest="repeat", help="Number of repetitions",
+                        default=1)
+    parser.add_argument("--verbose", help="increase output verbosity",
+                        action="store_true")
     args = parser.parse_args()
 
     global files
@@ -77,7 +82,7 @@ def searching_pdb():
     return(total_number_of_pdb_files)
 
 def argument_processing(args, total_number_of_pdb_files):
-    print(args)
+    #print(args)
     print('Parametrs ')
     print('Total number of pdb files', total_number_of_pdb_files)
 
@@ -159,8 +164,9 @@ def pymol_processing():
 if __name__ == '__main__':
     args = argument()
     total_number_of_pdb_files = searching_pdb()
-    argument_processing(args, total_number_of_pdb_files)
-    strings = using_adderror()
-    find_index(strings)
-    #ensamble-fit()
-    pymol_processing()
+    for i in range(args.repeat):
+        argument_processing(args, total_number_of_pdb_files)
+        strings = using_adderror()
+        find_index(strings)
+        #ensamble-fit()
+        pymol_processing()
