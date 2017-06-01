@@ -14,14 +14,12 @@ from adderror import adderror
 """-k number of selected structure"""
 """-r repet of program"""
 
+files = []
+pdb_files = []
+exp_file = []
+
 def argument():
     parser = ArgumentParser()
-    pdb_files = []
-    exp_file = []
-    args = parser.parse_args()
-    files = listdir(args.myDirVariable)
-    list_of_random_items_modified = [None]*1
-
     parser.add_argument("-d", "--dir", dest="myDirVariable",
                         help="Choose dir", metavar="DIR", required=True)
 
@@ -38,7 +36,11 @@ def argument():
     parser.add_argument("-q", metavar='Q', type=int,
                         dest="mixing_koeficient", help="Mixing koeficient",
                         default=1)
+    args = parser.parse_args()
 
+    files = listdir(args.myDirVariable)
+    list_of_random_items_modified = [None]*1
+    return(args)
 
 def rmsd_pymol(structure_1, structure_2):
     with open("file_for_pymol.pml", "w") as file_for_pymol:
@@ -67,8 +69,10 @@ def searching_pdb():
             #print('experimental file', line)
         #    exp_file.append(line)
     total_number_of_pdb_files = len(pdb_files)
+    return(total_number_of_pdb_files)
 
-def argument_processing():
+def argument_processing(args, total_number_of_pdb_files):
+    print(args)
     print('Parametrs ')
     print('Total number of pdb files', total_number_of_pdb_files)
 
@@ -124,6 +128,7 @@ def result_rmsd():
         result = f.readline()
         values_of_index_result = result.split(',')[4:]
         sum_rmsd = 0
+
 def pymol_processing():
     dictionary_index_and_structure = dict()
     for i, j in enumerate(selected_files_for_ensamble):
@@ -138,6 +143,13 @@ def pymol_processing():
             sum_rmsd += f*computed_rmsd
 
     print('Sum of RMSD', sum_rmsd)
+
+
 if __name__ == '__main__':
-    argument()
-    searching_pdb()
+    args = argument()
+    total_number_of_pdb_files = searching_pdb()
+    argument_processing(args, total_number_of_pdb_files)
+    using_adderror()
+    find_index()
+    #ensamble-fit()
+    pymol_processing()
