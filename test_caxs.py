@@ -14,30 +14,30 @@ from adderror import adderror
 """-k number of selected structure"""
 """-r repet of program"""
 
-parser = ArgumentParser()
-pdb_files = []
-exp_file = []
+def argument():
+    parser = ArgumentParser()
+    pdb_files = []
+    exp_file = []
+    args = parser.parse_args()
+    files = listdir(args.myDirVariable)
+    list_of_random_items_modified = [None]*1
 
-parser.add_argument("-d", "--dir", dest="myDirVariable",
-                    help="Choose dir", metavar="DIR", required=True)
+    parser.add_argument("-d", "--dir", dest="myDirVariable",
+                        help="Choose dir", metavar="DIR", required=True)
 
-parser.add_argument("-n", metavar='N', type=int,
-                    dest="number_of_selected_files",
-                    help="Number of selected structure",
-                    required=True)
+    parser.add_argument("-n", metavar='N', type=int,
+                        dest="number_of_selected_files",
+                        help="Number of selected structure",
+                        required=True)
 
-parser.add_argument("-k", metavar='K', type=int,
-                    dest="k_number_of_options",
-                    help="Number of possibility structure, less then selected files",
-                    required=True)
+    parser.add_argument("-k", metavar='K', type=int,
+                        dest="k_number_of_options",
+                        help="Number of possibility structure, less then selected files",
+                        required=True)
 
-parser.add_argument("-q", metavar='Q', type=int,
-                    dest="mixing_koeficient", help="Mixing koeficient",
-                    default=1)
-
-
-args = parser.parse_args()
-files = listdir(args.myDirVariable)
+    parser.add_argument("-q", metavar='Q', type=int,
+                        dest="mixing_koeficient", help="Mixing koeficient",
+                        default=1)
 
 
 def rmsd_pymol(structure_1, structure_2):
@@ -57,82 +57,87 @@ def rmsd_pymol(structure_1, structure_2):
     print('RMSD ', structure_1, ' and ', structure_2, ' = ', rmsd)
     return rmsd
 
+def searching_pdb():
+    for line in files:
+        line = line.rstrip()
+        if re.search('.pdb$', line):
+            #if re.search('.pdb.dat', line):
+            pdb_files.append(line)
+        #if re.search('exp.dat', line):
+            #print('experimental file', line)
+        #    exp_file.append(line)
+    total_number_of_pdb_files = len(pdb_files)
 
-for line in files:
-    line = line.rstrip()
-    if re.search('.pdb$', line):
-        #if re.search('.pdb.dat', line):
-        pdb_files.append(line)
-    #if re.search('exp.dat', line):
-        #print('experimental file', line)
-    #    exp_file.append(line)
+def argument_processing():
+    print('Parametrs ')
+    print('Total number of pdb files', total_number_of_pdb_files)
 
+    if total_number_of_pdb_files < args.number_of_selected_files:
+        print("Number od pdb files is ", total_number_of_pdb_files)
+        sys.exit(0)
 
-total_number_of_pdb_files = len(pdb_files)
-print('Parametrs ')
-print('Total number of pdb files', total_number_of_pdb_files)
+    if args.k_number_of_options > args.number_of_selected_files:
+        print("Number of selected structure is only", args.number_of_selected_files)
+        sys.exit(0)
 
-if total_number_of_pdb_files < args.number_of_selected_files:
-    print("Number od pdb files is ", total_number_of_pdb_files)
-    sys.exit(0)
+    if args.mixing_koeficient != 1:
+        print ("For q>1 is not implemented now \n")
+        sys.exit(0)
 
-if args.k_number_of_options > args.number_of_selected_files:
-    print("Number of selected structure is only", args.number_of_selected_files)
-    sys.exit(0)
+    print('Files from directory', args.myDirVariable)
+    print('The number of the selected files',
+          args.number_of_selected_files)
+    print('The number of selected options', args.k_number_of_options)
+    print('All pdb.dat files \n', pdb_files)
 
-if args.mixing_koeficient != 1:
-    print ("For q>1 is not implemented now \n")
-    sys.exit(0)
+    selected_files_for_ensamble = random.sample(pdb_files,
+                                                args.number_of_selected_files)
+    print('Randomly selected files: \n', selected_files_for_ensamble)
 
-print('Files from directory', args.myDirVariable)
-print('The number of the selected files',
-      args.number_of_selected_files)
-print('The number of selected options', args.k_number_of_options)
-print('All pdb.dat files \n', pdb_files)
+    list_of_random_items = random.sample(selected_files_for_ensamble,
+                                         args.k_number_of_options)
+    print('Randomly selected files: \n', list_of_random_items)
 
-selected_files_for_ensamble = random.sample(pdb_files,
-                                            args.number_of_selected_files)
-print('Randomly selected files: \n', selected_files_for_ensamble)
+def using_adderror():
+    list_of_random_items_modified[0] = adderror("exp.dat",list_of_random_items[0]+'.dat')
+    str1 = ''.join(str(e)+"\n" for e in list_of_random_items_modified)
+    str2 = ''.join(str(e)+"\n" for e in list_of_random_items)
+    print(str1)
+    print(str2)
 
-list_of_random_items = random.sample(selected_files_for_ensamble,
-                                     args.k_number_of_options)
-print('Randomly selected files: \n', list_of_random_items)
+def find_index():
+    for e in list_of_random_items:
+        value_of_index = selected_files_for_ensamble.index(e)
+        print(selected_files_for_ensamble.index(e))
 
-list_of_random_items[0] = adderror("exp.dat",list_of_random_items[0]+'.dat')
+    with open("input_for_ensamble_fit", "w") as f:
+        f.write(str1)
 
-str1 = ''.join(str(e)+"\n" for e in list_of_random_items)
-print(str1)
-"""
-for e in list_of_random_items:
-    value_of_index = selected_files_for_ensamble.index(e)
-    print(selected_files_for_ensamble.index(e))
+def ensamble_fit():
+    command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items_modified[0]+".dat"
 
-with open("input_for_ensamble_fit", "w") as f:
-    f.write(str1)
+    subprocess.call(command,shell=True)
 
-#command = "/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p /storage/brno2/home/petrahrozkova/SAXS/mod -n " +  str(args.number_of_selected_files) + " -m /storage/brno2/home/petrahrozkova/SAXS/" +list_of_random_items[0]+".dat"
+def result_rmsd():
+    with open('result', 'r') as f:
+        (f.readline())
+        result = f.readline()
+        values_of_index_result = result.split(',')[4:]
+        sum_rmsd = 0
+def pymol_processing():
+    dictionary_index_and_structure = dict()
+    for i, j in enumerate(selected_files_for_ensamble):
+        dictionary_index_and_structure[i] = j
 
-#subprocess.call(command,shell=True)
+    for i, j in enumerate(values_of_index_result):
+        f = float(j)
+        if f != 0:
+            computed_rmsd = rmsd_pymol(selected_files_for_ensamble[i],
+                                       list_of_random_items[0])
+            print('Adjusted rmsd ', f*computed_rmsd, '\n')
+            sum_rmsd += f*computed_rmsd
 
-# RMSD in PyMol
-with open('result', 'r') as f:
-    (f.readline())
-    result = f.readline()
-    values_of_index_result = result.split(',')[4:]
-    sum_rmsd = 0
-
-dictionary_index_and_structure = dict()
-for i, j in enumerate(selected_files_for_ensamble):
-    dictionary_index_and_structure[i] = j
-
-for i, j in enumerate(values_of_index_result):
-    f = float(j)
-    if f != 0:
-        computed_rmsd = rmsd_pymol(selected_files_for_ensamble[i],
-                                   list_of_random_items[0])
-        print('Adjusted rmsd ', f*computed_rmsd, '\n')
-        sum_rmsd += f*computed_rmsd
-
-print('Sum of RMSD', sum_rmsd)
-
-"""
+    print('Sum of RMSD', sum_rmsd)
+if __name__ == '__main__':
+    argument()
+    searching_pdb()

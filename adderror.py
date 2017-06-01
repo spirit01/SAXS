@@ -35,5 +35,6 @@ def adderror(file1, file2):
 					#modified.write("hello")
 					modified.write("""{s1} \t {s2} \t {s3} \n  """.format(s1=f[0], s2=np.random.normal(float(f[1]),e), s3= e))
 					#print(f[0], np.random.normal(float(f[1]),e), e)
+	return("file_modified")
 if __name__ == '__main__':
 	adderror(sys.argv[1], sys.argv[2])
