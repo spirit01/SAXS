@@ -63,7 +63,8 @@ def rmsd_pymol(structure_1, structure_2):
                    s3=os.path.splitext(structure_1)[0],
                    s4=os.path.splitext(structure_2)[0]))
     out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
-    #part for home:out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
+    #part for home:
+    out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
     #part for META:out_pymol = subprocess.check_output("module add pymol-1.8.2.1-gcc; pymol -c file_for_pymol.pml | grep Executive:;module rm pymol-1.8.2.1-gcc", shell=True)
     rmsd = float(out_pymol[out_pymol.index(b'=')+1:out_pymol.index(b'(')-1])
     print('RMSD ', structure_1, ' and ', structure_2, ' = ', rmsd)
@@ -174,7 +175,7 @@ if __name__ == '__main__':
          strings = using_adderror()
         #find_index(strings)
     #    ensamble_output = ensamble-fit()
-    ensamble_output=[None]*1
+    ensamble_output=[None]*2
     ensamble_output[0] = result_rmsd()
     if args.k_number_of_options ==1:
         pymol_processing(ensamble_output)
