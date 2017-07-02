@@ -120,8 +120,9 @@ def work_with_result_from_ensamble():
 
     return(result_q_and_value)
 
-def do_result(args):
+def do_result(args, select_random_files_for_experiment, data_for_experiment,f):
     result_q_and_value = work_with_result_from_ensamble()
+    list_of_tuples = []
     if args.result == 0:
         tolerance = 0
     else:
@@ -130,10 +131,22 @@ def do_result(args):
             print('Less then 1')
             sys.exit(0)
     maximum = float(max(result_q_and_value)[0])
-    print(maximum)
+
     minimum = maximum - maximum*tolerance
     print(maximum, minimum)
-    list_of_tuples = []
+    for i,j in result_q_and_value:
+        if float(i) >= minimum:
+            f.write('minimum a maximum:' + '\t' + str(minimum) + str(maximum) + '\n')
+            for k in range(len(j)):
+                if float(j[k]) != 0:
+                     list_of_tuples.append((i, j[k], select_random_files_for_experiment[k]))
+            print('vysledek',list_of_tuples)
+            sum_rmsd = 0
+            for k in list_of_tuples:
+                sum_rmsd = sum_rmsd + rmsd_pymol(data_for_experiment[0], k[2], f)*float(k[1])
+            f.write('sum rmsd'+ '\t' + str(sum_rmsd) + '\n')
+            list_of_tuples = []
+            print('rmsd pymol', sum_rmsd)
     #print(maximum)
     #for i in range(len(maximum[1])):
     #    if float(maximum[1][i]) != 0:
@@ -155,7 +168,7 @@ def be_pessimist(result_q_and_value):
             list_of_tuples.append((i , maximum[1][i]))
     print(list_of_tuples)
 
-    return(list_of_tuples)
+    return(list_of_tuples)list
 
 
 def be_optimist(result_q_and_value):
@@ -193,15 +206,15 @@ def make_curve_for_experiment(data_for_experiment_modified, args):
                     sum_result = sum_result + result
 
             if sum_result != 0:
-                print(sum_result)
+                #print(sum_result)
                 f.write(str(0) + '\t' +str(sum_result) + '\t' + str(0) + '\n')
     for file in files:
         file.close()
     curve_for_ensamble = adderror("exp.dat", 'result.pdb.dat')
-    print(curve_for_ensamble)
+    #print(curve_for_ensamble)
     return(curve_for_ensamble)
 
-def rmsd_pymol(structure_1, structure_2):
+def rmsd_pymol(structure_1, structure_2, f):
     with open("file_for_pymol.pml", "w") as file_for_pymol:
         file_for_pymol.write("""
         load  {s1}
@@ -216,6 +229,7 @@ def rmsd_pymol(structure_1, structure_2):
     out_pymol = subprocess.check_output(" pymol -c file_for_pymol.pml | grep Executive:", shell=True)
     #part for META:out_pymol = subprocess.check_output("module add pymol-1.8.2.1-gcc; pymol -c file_for_pymol.pml | grep Executive:;module rm pymol-1.8.2.1-gcc", shell=True)
     rmsd = float(out_pymol[out_pymol.index(b'=')+1:out_pymol.index(b'(')-1])
+    f.write('RMSD ' + '\t' + structure_1 + ' and ' + structure_2 + ' = ' + str(rmsd) + '\n')
     print('RMSD ', structure_1, ' and ', structure_2, ' = ', rmsd)
     return(rmsd)
 
@@ -233,11 +247,19 @@ if __name__ == '__main__':
         print_parametrs_verbose(args)
 
     for i in range(args.repeat):
-        select_random_files_for_experiment = select_n(args)
-        data_for_experiment = select_k(args, select_random_files_for_experiment)
-        data_for_experiment_modified = [None]*args.k_options
-        for i in range(args.k_options):
-            data_for_experiment_modified [i] = str(data_for_experiment[i])+".dat"
-        ensamble_fit(args, select_random_files_for_experiment, data_for_experiment_modified)
-        #work_with_result_from_ensamble()
-        do_result(args)
+        filename = 'output_' + str(i)
+        with open(filename, 'w') as f:
+            select_random_files_for_experiment = select_n(args)
+            data_for_experiment = select_k(args, select_random_files_for_experiment)
+            f.write('N selected file' + str(select_random_files_for_experiment) + '\n')
+            f.write('k options' + str(data_for_experiment) + '\n')
+            data_for_experiment_modified = [None]*args.k_options
+            for i in range(args.k_options):
+                data_for_experiment_modified [i] = str(data_for_experiment[i])+".dat"
+            ensamble_fit(args, select_random_files_for_experiment, data_for_experiment_modified)
+            #work_with_result_from_ensamble()
+            if args.k_options == 1:
+                do_result(args, select_random_files_for_experiment, data_for_experiment,f)
+            else:
+                print('not implemented')
+                sys.exit(0)
