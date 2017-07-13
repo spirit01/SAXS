@@ -64,8 +64,8 @@ def test_argument(args):
 
 def print_parametrs_verbose(args):
     print('Parametrs ')
+    print ('Working directory', os.getcwd())
     print('Total number of pdb files is', int(len(find_pdb_file(args))))
-    print('Files from directory', args.myDirVariable)
     print('The number of the selected files',
           args.n_files)
     print('The number of selected options', args.k_options)
@@ -237,6 +237,8 @@ def rmsd_pymol(structure_1, structure_2, f):
 
 if __name__ == '__main__':
     args = get_argument()
+    os.chdir(args.myDirVariable)
+
     modified_data = []
     data_for_experiment = []
     find_pdb_file(args)
