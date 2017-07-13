@@ -1,0 +1,8 @@
+N selected file['mod03.pdb', 'mod14.pdb', 'mod13.pdb', 'mod16.pdb', 'mod10.pdb', 'mod09.pdb', 'mod15.pdb', 'mod04.pdb', 'mod11.pdb', 'mod06.pdb']
+k options['mod15.pdb']
+minimum a maximum:	4.952614.95261
+RMSD 	mod15.pdb and mod14.pdb = 1.446
+RMSD 	mod15.pdb and mod13.pdb = 1.843
+RMSD 	mod15.pdb and mod04.pdb = 1.184
+RMSD 	mod15.pdb and mod06.pdb = 1.425
+sum rmsd	2.165528
