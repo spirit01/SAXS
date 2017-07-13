@@ -238,7 +238,7 @@ def rmsd_pymol(structure_1, structure_2, f):
 if __name__ == '__main__':
     args = get_argument()
     os.chdir(args.myDirVariable)
-
+s
     modified_data = []
     data_for_experiment = []
     find_pdb_file(args)
