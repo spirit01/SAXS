@@ -1,8 +1,0 @@
-N selected file['mod02.pdb', 'mod15.pdb', 'mod10.pdb', 'mod11.pdb', 'mod18.pdb', 'mod01.pdb', 'mod16.pdb', 'mod12.pdb', 'mod04.pdb', 'mod05.pdb']
-k options['mod01.pdb']
-minimum a maximum:	4.952614.95261
-RMSD 	mod01.pdb and mod15.pdb = 1.328
-RMSD 	mod01.pdb and mod10.pdb = 2.058
-RMSD 	mod01.pdb and mod12.pdb = 1.674
-RMSD 	mod01.pdb and mod05.pdb = 1.196
-sum rmsd	1.976976
