@@ -90,9 +90,9 @@ def ensamble_fit(k_options, n_files,
         #name = input("Enter your name: ")   # Python 3
         curve_for_ensamble = make_curve_for_experiment(data_for_experiment_modified,
                                                        k_options)
-        # command = '/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p {path}{pdbdir}/ -n {n} -m {saxscurve}'.format(path = os.getcwd(), pdbdir=tmpdirname[1:], n=n_files, saxscurve=curve_for_ensamble)
-        # print(command)
-        # subprocess.call(command, shell=True)
+        command = '/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p {path}{pdbdir}/ -n {n} -m {saxscurve}'.format(path = os.getcwd(), pdbdir=tmpdirname[1:], n=n_files, saxscurve=curve_for_ensamble)
+        print(command)
+        #subprocess.call(command, shell=True)
     return ()
 
 
@@ -230,10 +230,13 @@ def main():
             data_for_experiment_modified = [None] * args.k_options
             for j in range(args.k_options):
                 data_for_experiment_modified[j] = str(data_for_experiment[j]) + ".dat"
+            weight = np.random.dirichlet(np.ones(args.k_options), size=1).transpose()
+            file_and_weight = zip(weight[0], data_for_experiment)
+            print('pouziti zip',list(file_and_weight))
             ensamble_fit(args.k_options, args.n_files,
                          select_random_files_for_experiment,
                          data_for_experiment_modified)
-            # work_with_result_from_ensamble( args)
+            work_with_result_from_ensamble()
             if args.k_options == 1:
                 do_result(args.result, select_random_files_for_experiment,
                           data_for_experiment, f)
