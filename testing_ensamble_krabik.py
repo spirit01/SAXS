@@ -76,21 +76,19 @@ def print_parametrs_verbose(n_files, k_options, list_pdb_file):
     print('All pdb.dat files \n', list_pdb_file)
 
 
-def ensamble_fit(k_options, n_files,
-                 selected_files_for_ensamble,
-                 data_for_experiment_modified):
+def ensamble_fit(selected_files_for_ensamble,
+                 data_for_experiment_modified, file_and_weight):
     with tempfile.TemporaryDirectory(dir='.') as tmpdirname:
         print('created temporary directory', tmpdirname)
         i = 1
         for f in selected_files_for_ensamble:
             shutil.copy(f, tmpdirname + '/' + str(i).zfill(2) + '.pdb')
             i += 1
-
+        print('ZKOUSKA', len(selected_files_for_ensamble), len(data_for_experiment_modified))
         print('zkouska', tmpdirname[2:])
         #name = input("Enter your name: ")   # Python 3
-        curve_for_ensamble = make_curve_for_experiment(data_for_experiment_modified,
-                                                       k_options)
-        command = '/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p {path}{pdbdir}/ -n {n} -m {saxscurve}'.format(path = os.getcwd(), pdbdir=tmpdirname[1:], n=n_files, saxscurve=curve_for_ensamble)
+        curve_for_ensamble = make_curve_for_experiment(data_for_experiment_modified, file_and_weight)
+        command = '/storage/brno3-cerit/home/krab1k/saxs-ensamble-fit/core/ensamble-fit -L -p {path}{pdbdir}/ -n {n} -m {saxscurve}'.format(path = os.getcwd(), pdbdir=tmpdirname[1:], n=len(selected_files_for_ensamble), saxscurve=curve_for_ensamble)
         print(command)
         #subprocess.call(command, shell=True)
     return ()
@@ -151,18 +149,13 @@ def do_result(result, select_random_files_for_experiment,
     print(tolerance)
 
 
-def make_curve_for_experiment(data_for_experiment_modified,
-                              k_options):
+def make_curve_for_experiment(data_for_experiment_modified, file_and_weight):
     print('data', data_for_experiment_modified)
-    i = 0
-    file_and_weight = []
-    tmp = np.random.dirichlet(np.ones(k_options), size=1).transpose()
-    for files in data_for_experiment_modified:
-        file_and_weight.append((files, float(tmp[i])))
-        i += 1
-    print(file_and_weight)
-    # result = []
+    tmp = list(file_and_weight)
     files = [open(file, 'r') for file in data_for_experiment_modified]
+    print(tmp)
+    print(data_for_experiment_modified)
+
     with open('result.pdb.dat', 'w') as f:
         run = True
         while run:
@@ -175,10 +168,15 @@ def make_curve_for_experiment(data_for_experiment_modified,
                     run = False
                     break
                 if not line.startswith('#'):
-                    sum_result += float(line.split(' ')[4]) * file_and_weight[i][1]
-                    q = float(line[:10])
+                    #print(line)
+                    tmp_list = list(filter(None,line.split(' ')))
+                    sum_result += float(tmp_list[1])* tmp[i][0]
+                    #print('vysledek',tmp_list[1], tmp[i][0], sum_result)
+                    q = float(tmp_list[0])
+                    i += 1
             if sum_result != 0:
                 f.write(str(q) + '\t' + str(sum_result) + '\t' + str(0) + '\n')
+
     for file in files:
         file.close()
     curve_for_ensamble = adderror("exp.dat", 'result.pdb.dat')
@@ -230,12 +228,10 @@ def main():
             data_for_experiment_modified = [None] * args.k_options
             for j in range(args.k_options):
                 data_for_experiment_modified[j] = str(data_for_experiment[j]) + ".dat"
-            weight = np.random.dirichlet(np.ones(args.k_options), size=1).transpose()
-            file_and_weight = zip(weight[0], data_for_experiment)
-            print('pouziti zip',list(file_and_weight))
-            ensamble_fit(args.k_options, args.n_files,
-                         select_random_files_for_experiment,
-                         data_for_experiment_modified)
+            weight = np.random.dirichlet(np.ones(args.k_options), size=1)[0]
+            file_and_weight = zip(weight, data_for_experiment)
+            ensamble_fit(select_random_files_for_experiment,
+                         data_for_experiment_modified, file_and_weight)
             work_with_result_from_ensamble()
             if args.k_options == 1:
                 do_result(args.result, select_random_files_for_experiment,
